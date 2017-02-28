@@ -11,31 +11,16 @@ import (
 	"github.com/erizocosmico/lua/ast"
 )
 
-const (
-	// Driver name.
-	Driver = "lua:1.0.0"
-	// Language name.
-	Language = "lua"
-	// Version of the driver.
-	Version = "1.0.0"
-
-	// ParseASTAction is the default action of the driver.
-	ParseASTAction = "ParseAST"
-)
-
 // AST is a collection of lua statements.
 type AST struct {
 	// Stmts contains all the statements in the lua file.
-	Stmts []ast.Stmt
+	Stmts []ast.Stmt `json:"stmts"`
 }
 
 // Request input received by the driver.
 type Request struct {
-	// Action of the request.
-	Action string `json:"action"`
 	// Content of the request, which contains the source code to parse.
 	Content string `json:"content"`
-	// a request can have more fields, but we only care about these
 }
 
 // Response is the result output of parsing the AST.
@@ -46,12 +31,6 @@ type Response struct {
 	Status Status `json:"status"`
 	// Errors occurred during the process of the request.
 	Errors []ErrorMessage `json:"errors"`
-	// Language of the driver.
-	Language string `json:"language"`
-	// Version of the current driver.
-	Version string `json:"language_version"`
-	// Driver identifier.
-	Driver string `json:"driver"`
 }
 
 // Status of a response.
@@ -70,27 +49,27 @@ const (
 // DefaultResponse creates a new empty response with the driver settings set.
 func DefaultResponse() *Response {
 	return &Response{
-		Language: Language,
-		Driver:   Driver,
-		Version:  Version,
-		Errors:   []ErrorMessage{},
+		Errors: []ErrorMessage{},
 	}
 }
 
 // NewASTResponse creates a new response with an AST.
 func NewASTResponse(ast *AST) *Response {
-	resp := DefaultResponse()
-	resp.Status = Ok
-	resp.AST = ast
-	return resp
+	return &Response{
+		Errors: []ErrorMessage{},
+		Status: Ok,
+		AST:    ast,
+	}
 }
 
 // NewErrorResponse creates a new response with an error message.
 func NewErrorResponse(status Status, err error) *Response {
-	resp := DefaultResponse()
-	resp.Status = status
-	resp.Errors = append(resp.Errors, ErrorMessage{status, fmt.Sprint(err)})
-	return resp
+	return &Response{
+		Status: status,
+		Errors: []ErrorMessage{
+			{status, fmt.Sprint(err)},
+		},
+	}
 }
 
 // ErrorMessage is a single error that occurred during the process of the
@@ -108,13 +87,6 @@ func processRequest(line []byte) *Response {
 		return NewErrorResponse(
 			Fatal,
 			fmt.Errorf("unable to decode request from json: %s", err),
-		)
-	}
-
-	if req.Action != ParseASTAction {
-		return NewErrorResponse(
-			Error,
-			fmt.Errorf("unknown action: %s", req.Action),
 		)
 	}
 

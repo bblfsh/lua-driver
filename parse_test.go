@@ -54,7 +54,6 @@ end
 func TestProcessRequest(t *testing.T) {
 	cases := []struct {
 		name      string
-		action    string
 		input     string
 		numErrors int
 		status    Status
@@ -63,7 +62,6 @@ func TestProcessRequest(t *testing.T) {
 	}{
 		{
 			"valid input",
-			ParseASTAction,
 			validLua,
 			0,
 			Ok,
@@ -72,7 +70,6 @@ func TestProcessRequest(t *testing.T) {
 		},
 		{
 			"invalid input",
-			ParseASTAction,
 			invalidLua,
 			1,
 			Error,
@@ -80,17 +77,7 @@ func TestProcessRequest(t *testing.T) {
 			true,
 		},
 		{
-			"invalid action",
-			"foo bar",
-			validLua,
-			1,
-			Error,
-			true,
-			true,
-		},
-		{
 			"not json",
-			ParseASTAction,
 			"fooo bar baz",
 			1,
 			Fatal,
@@ -104,7 +91,6 @@ func TestProcessRequest(t *testing.T) {
 		var err error
 		if c.marshal {
 			req, err = json.Marshal(&Request{
-				Action:  c.action,
 				Content: c.input,
 			})
 			if err != nil {
