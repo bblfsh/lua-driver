@@ -7,6 +7,6 @@
 # version of Debian (eg.: `debian:jessie-slim`). If the excution environment
 # is equals to the build environment the build image can be use as FROM:
 #   bblfsh/<language>-driver-build
-FROM bblfsh/lua-driver-build
+FROM alpine:3.5
 
 CMD /opt/driver/bin/driver
