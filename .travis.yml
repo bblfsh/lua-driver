@@ -2,12 +2,17 @@ language: go
 
 go:
   - 1.8
-  - tip
 
+services:
+  - docker
 
-matrix:
-  allow_failures:
-    - go: tip
+before_script:
+  - go get -v github.com/bblfsh/sdk/...
+  - bblfsh-sdk prepare-build .
+  - go get -v -t ./...
 
-install:
-  - go get -t ./...
+script:
+  - make test
+
+after_success:
+  - make push
